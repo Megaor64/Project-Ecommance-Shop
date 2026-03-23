@@ -21,7 +21,7 @@ async function verificationMail(to, code) {
     })
 }
 
-async function resetPasswordMail(to, token) {
+async function resetPasswordMail(to) {
     const baseUrl =
     "http://localhost:3005";
   const resetUrl = `${baseUrl}/reset-password?={token}`;

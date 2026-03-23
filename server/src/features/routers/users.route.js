@@ -2,7 +2,7 @@ import express from "express"
 import { deleteUser, getMyOrders, getUserById, getUsers, updateUser } from "../controllers/users.controller.js"
 import { authMiddleware } from "../../shared/middleware/authMiddleware.js"
 import { checkPermissions } from "../../shared/middleware/checkPermissions.js"
-import { validateRequest } from "/Users/orazu/Desktop/fullstack course/project Ecommance shop/server/src/shared/middleware/validateRequest.js"
+import { validateRequest } from "../../shared/middleware/validateRequest.js"
 import { getUserByIdParamsSchema, updateUserBodySchema } from "../validation/user.schemas.js"
 
 const router = express.Router()

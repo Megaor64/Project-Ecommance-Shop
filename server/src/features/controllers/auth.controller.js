@@ -230,26 +230,24 @@ export const adminLoginStep2 = async (req, res, next) => {
 
 export const forgotPassword = async ( req, res, next) =>{
   try {
-    const { email, token } = req.body
+    const { email } = req.body
     const user = await User.findOne({ email });
     if (!user)
       return { message: "If the email exists, a reset link has been sent" };
-    const resetPasswordToken = token;
-    const resetPasswordTokenExpiry = new Date(
-      Date.now() + 1 * 60 * 60 * 1000,
-    );
-    user.resetPasswordToken = resetPasswordToken;
-    user.resetPasswordTokenExpiry = resetPasswordTokenExpiry;
     await user.save();
     try {
-      await mailer.resetPasswordMail(email, token);
+      await mailer.resetPasswordMail(email);
     } catch (error) {
       console.log("email not sent");
     }
+    const resetToken = jwt.sign({ userId: user._id }, process.env.RESET_JWT_SECRET, {
+      expiresIn: "15m",
+    });
+
   return res.status(200).json({
     status: 200,
     message: "Reset password link had been sent",
-    data: null
+    data: resetToken
   })
   } catch (error) {
     next(error)
@@ -258,11 +256,10 @@ export const forgotPassword = async ( req, res, next) =>{
 
 export const resetPassword = async ( req, res, next) =>{
   try {
-    const { token, newPassword } = req.body
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordTokenExpiry: { $gt: new Date() },
-    });
+    const { resetToken, newPassword } = req.body
+    const user = await User.findOne(
+       resetToken, process.env.RESET_JWT_SECRET
+    );
     if (!user) throw new Error("Invalid or expired reset token");
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
